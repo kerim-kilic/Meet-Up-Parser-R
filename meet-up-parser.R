@@ -7,11 +7,13 @@
 
 library("jsonlite")
 library("tidyverse")
+library("hash")
 
 data <- fromJSON("meetup_data.json")
 data <- data["input"]
 df <- data.frame(data)
 
+final_string = c()
 i <- 0
 while(i != nrow(df))
 {
@@ -43,7 +45,7 @@ while(i != nrow(df))
   {
     if("city" %in% names(location[[1]]) && "state" %in% names(location[[1]]))
     {
-      location_string <- paste0(location_string, a[j + 1,1], ", " , a[j + 1,2], ".", a[j + 1,3])
+      location_string <- paste0(location_string, a[j + 1,1], ", " , a[j + 1,2], ". ", a[j + 1,3])
     }
     else if("city" %in% names(location[[1]]) && !("state" %in% names(location[[1]])))
     {
@@ -63,6 +65,15 @@ while(i != nrow(df))
     }
     j <- j + 1
   }
+  final_string <- append(final_string,paste0(meetup_string, location_string))
   location_string <- ""
   i <- i + 1
 }
+meetUps <- final_string
+meetUps <- {"meetUps" : meetUps}
+meetUps <- as.data.frame(meetUps)
+
+x <- toJSON(meetUps, dataframe = "columns")
+x <- prettify(x, indent = 2)
+cat(x)
+write(x, "output.json")

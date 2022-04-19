@@ -7,7 +7,6 @@
 
 library("jsonlite")
 library("tidyverse")
-library("hash")
 
 data <- fromJSON("meetup_data.json")
 data <- data["input"]
@@ -61,8 +60,23 @@ while(i != nrow(df))
     }
     else if(j == 0 && size > 1 && data_frame(a$country)[1,1] == data_frame(a$country)[2,1])
     {
-      location_string <- str_replace(location_string, as.character(paste0(", ",data_frame(a$country)[1,1])), " | ")
+      if(!("state" %in% names(location[[1]])))
+      {
+        print("A")
+        location_string <- str_replace(location_string, as.character(paste0(", ",data_frame(a$country)[1,1])), " | ")
+      }
+      else if("state" %in% names(location[[1]]) && data_frame(a$state)[1,1] == data_frame(a$state)[2,1])
+      {
+        print("B")
+        location_string <- str_replace(location_string, as.character(paste0(", ", data_frame(a$state)[1,1], ". ", data_frame(a$country)[1,1] )), " | ")
+      }
+      else if("state" %in% names(location[[1]]) && data_frame(a$state)[1,1] != data_frame(a$state)[2,1])
+      {
+        print("B")
+        location_string <- str_replace(location_string, as.character(paste0(". ", data_frame(a$country)[1,1] )), " | ")
+      }
     }
+    
     j <- j + 1
   }
   final_string <- append(final_string,paste0(meetup_string, location_string))
@@ -70,7 +84,7 @@ while(i != nrow(df))
   i <- i + 1
 }
 meetUps <- final_string
-meetUps <- {"meetUps" : meetUps}
+
 meetUps <- as.data.frame(meetUps)
 
 x <- toJSON(meetUps, dataframe = "columns")
